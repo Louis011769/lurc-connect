@@ -67,17 +67,17 @@ def clean(content):
     c = re.sub(r'(?i)</?(?:div|figure|section|span|header|footer|main|article|picture)\b[^>]*>', '', c)
     c = re.sub(r'(?i)<figcaption[^>]*>', '<p class="muted-small">', c)
     c = re.sub(r'(?i)</figcaption>', '</p>', c)
-    # keep youtube iframes, drop any other iframe
-    def keep_iframe(m):
-        src = (re.search(r'src="([^"]+)"', m.group(0)) or [None, ""])[1]
+    # Videos -> placeholder tokens now; expand to iframes at the very end, so a
+    # second pass cannot re-match the YouTube URL inside a freshly built iframe src.
+    def yt_token(m):
+        src = (re.search(r'src="([^"]+)"', m.group(0)) or [None, ""])[1] or ""
         mm = re.search(r'(?:embed/|v=|youtu\.be/)([A-Za-z0-9_-]{6,})', src)
-        return yt_iframe(mm.group(1)) if mm else ''
-    c = re.sub(r'(?is)<iframe[^>]*>.*?</iframe>|<iframe[^>]*/?>', keep_iframe, c)
-    # bare youtube URLs (left as text by wp embeds) -> iframe
-    def yt_url(m):
+        return ("\x01VID:%s\x01" % mm.group(1)) if mm else ''
+    c = re.sub(r'(?is)<iframe[^>]*>.*?</iframe>|<iframe[^>]*/?>', yt_token, c)
+    def yt_url_token(m):
         mm = re.search(r'(?:v=|youtu\.be/|embed/)([A-Za-z0-9_-]{6,})', m.group(0))
-        return yt_iframe(mm.group(1)) if mm else ''
-    c = re.sub(r'https?://(?:www\.)?(?:youtube\.com/watch\?[^\s"<]+|youtu\.be/[A-Za-z0-9_-]+|youtube\.com/embed/[A-Za-z0-9_-]+)', yt_url, c)
+        return ("\x01VID:%s\x01" % mm.group(1)) if mm else ''
+    c = re.sub(r'https?://(?:www\.)?(?:youtube\.com/watch\?[^\s"<]+|youtu\.be/[A-Za-z0-9_-]+|youtube\.com/embed/[A-Za-z0-9_-]+)', yt_url_token, c)
     # unwrap anchors that merely wrap an image (WP links to the full-size CDN copy)
     c = re.sub(r'(?is)<a\b[^>]*>\s*(<img[^>]*>)\s*</a>', r'\1', c)
     # no em-dashes anywhere on the site (replace with commas)
@@ -86,6 +86,9 @@ def clean(content):
     # tidy empties / whitespace
     c = re.sub(r'(?i)<p>\s*(?:&nbsp;)?\s*</p>', '', c)
     c = re.sub(r'\n{3,}', '\n\n', c).strip()
+    # expand video tokens into responsive embeds (after every other pass)
+    c = re.sub('\x01VID:([A-Za-z0-9_-]+)\x01', lambda m: yt_iframe(m.group(1)), c)
+    c = re.sub(r'(?is)<p>\s*(<div class="video-frame">.*?</div>)\s*</p>', r'\1', c)
     return c
 
 posts = json.loads(fetch(API).decode("utf-8", "replace"))
