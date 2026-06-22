@@ -1,4 +1,4 @@
-// Loughborough URC — minimal site JS (no dependencies, no build step)
+// Loughborough URC, minimal site JS (no dependencies, no build step)
 
 // Mobile navigation toggle
 (function () {

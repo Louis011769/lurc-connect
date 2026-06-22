@@ -1,4 +1,4 @@
-/* Loughborough URC — site styles
+/* Loughborough URC, site styles
    Owned, no-build static site. Edit colours/fonts here once; applies everywhere.
    Palette chosen to feel warm, dignified and welcoming, with strong contrast
    and large text for accessibility (our readers skew older). */
@@ -124,7 +124,7 @@ img { max-width: 100%; display: block; }
     linear-gradient(160deg, rgba(22,58,49,.88), rgba(31,79,67,.78)),
     radial-gradient(120% 90% at 50% -10%, #2f6a59 0%, #163a31 70%);
   /* To use a real photo of the building, add:
-     , url("assets/church.jpg") center/cover no-repeat;  (keep the gradients first) */
+, url("assets/church.jpg") center/cover no-repeat;  (keep the gradients first) */
   padding: 84px 0 76px;
 }
 .hero h1 { color: #fff; max-width: 16ch; margin-inline: auto; }

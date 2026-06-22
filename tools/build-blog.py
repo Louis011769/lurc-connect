@@ -80,6 +80,9 @@ def clean(content):
     c = re.sub(r'https?://(?:www\.)?(?:youtube\.com/watch\?[^\s"<]+|youtu\.be/[A-Za-z0-9_-]+|youtube\.com/embed/[A-Za-z0-9_-]+)', yt_url, c)
     # unwrap anchors that merely wrap an image (WP links to the full-size CDN copy)
     c = re.sub(r'(?is)<a\b[^>]*>\s*(<img[^>]*>)\s*</a>', r'\1', c)
+    # no em-dashes anywhere on the site (replace with commas)
+    c = c.replace("&#8212;", "—").replace("&mdash;", "—")
+    c = re.sub(r'\s*—\s*', ', ', c)
     # tidy empties / whitespace
     c = re.sub(r'(?i)<p>\s*(?:&nbsp;)?\s*</p>', '', c)
     c = re.sub(r'\n{3,}', '\n\n', c).strip()
@@ -90,6 +93,7 @@ posts = json.loads(fetch(API).decode("utf-8", "replace"))
 articles = []
 for p in posts:
     title = html.unescape(p["title"]["rendered"]).strip()
+    title = re.sub(r'\s*—\s*', ', ', title)
     date = fmt_date(p["date"])
     body = clean(p["content"]["rendered"])
     articles.append(
@@ -139,7 +143,7 @@ HEADER = '''<!DOCTYPE html>
     <div class="page-head">
       <div class="wrap">
         <h1>Minister's Blog</h1>
-        <p>Warm, honest reflections from Craig Muir on faith, community and everyday life. Often the most up-to-date thing here — do drop in.</p>
+        <p>Warm, honest reflections from Craig Muir on faith, community and everyday life. Often the most up-to-date thing here, do drop in.</p>
       </div>
     </div>
 
