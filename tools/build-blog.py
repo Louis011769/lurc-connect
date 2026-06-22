@@ -81,8 +81,8 @@ def clean(content):
     # unwrap anchors that merely wrap an image (WP links to the full-size CDN copy)
     c = re.sub(r'(?is)<a\b[^>]*>\s*(<img[^>]*>)\s*</a>', r'\1', c)
     # no em-dashes anywhere on the site (replace with commas)
-    c = c.replace("&#8212;", "—").replace("&mdash;", "—")
-    c = re.sub(r'\s*—\s*', ', ', c)
+    c = c.replace("&#8212;", chr(8212)).replace("&mdash;", chr(8212))
+    c = re.sub(r"\s*"+chr(8212)+r"\s*", ", ", c)
     # tidy empties / whitespace
     c = re.sub(r'(?i)<p>\s*(?:&nbsp;)?\s*</p>', '', c)
     c = re.sub(r'\n{3,}', '\n\n', c).strip()
@@ -93,7 +93,7 @@ posts = json.loads(fetch(API).decode("utf-8", "replace"))
 articles = []
 for p in posts:
     title = html.unescape(p["title"]["rendered"]).strip()
-    title = re.sub(r'\s*—\s*', ', ', title)
+    title = re.sub(r"\s*"+chr(8212)+r"\s*", ", ", title)
     date = fmt_date(p["date"])
     body = clean(p["content"]["rendered"])
     articles.append(
@@ -110,7 +110,7 @@ HEADER = '''<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Minister's Blog | Loughborough URC</title>
-  <meta name="description" content="Reflections from Craig Muir, minister at Loughborough United Reformed Church — warm, honest writing on faith, community and everyday life." />
+  <meta name="description" content="Reflections from Craig Muir, minister at Loughborough United Reformed Church, warm, honest writing on faith, community and everyday life." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
